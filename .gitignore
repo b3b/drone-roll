@@ -1,0 +1,8 @@
+build/
+bin/
+*~
+*.swp
+*.sublime-workspace
+*.pyo
+*.pyc
+*.so
