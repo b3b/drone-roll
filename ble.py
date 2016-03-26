@@ -1,3 +1,4 @@
+import re
 from collections import namedtuple
 from kivy.logger import Logger
 from kivy.event import EventDispatcher
@@ -27,13 +28,16 @@ class BluetoothEventsListener(PythonJavaClass):
 
     @java_method('(Ljava/util/List;)V')
     def on_services(self, services):
+        services_dict = Services()
         for service in services.toArray():
             service_uuid = service.getUuid().toString()
             Logger.debug("Service discovered: {}".format(service_uuid))
+            services_dict[service_uuid] = {}
             for c in service.getCharacteristics().toArray():
                 characteristic_uuid = c.getUuid().toString()
                 Logger.debug("Characteristic discovered: {}".format(characteristic_uuid))
-        self.dispatcher.dispatch('on_services', services)
+                services_dict[service_uuid][characteristic_uuid] = c
+        self.dispatcher.dispatch('on_services', services_dict)
 
 class BluetoothLowEnergy(EventDispatcher):
 
@@ -108,3 +112,20 @@ class Advertisement(object):
                 segment = slice(pos + 2, next_pos)
                 yield Advertisement.AD(ad_type, bytearray(data[segment]))
             pos = next_pos
+
+class Services(dict):
+    """Services dict
+    >>> services = Services({'s0': {'c1-aa': 0, 'aa-c2-aa': 1},
+    ...                      's1': {'bb-c3-bb': 2}})
+    >>> services.search('c3')
+    2
+    >>> services.search('c4')
+    """
+
+    def search(self, pattern, flags=re.IGNORECASE):
+        """Search characteristic by pattern
+        """
+        for characteristics in self.values():
+            for uuid, characteristic in characteristics.items():
+                if re.search(pattern, uuid, flags):
+                    return characteristic
