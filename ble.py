@@ -11,27 +11,42 @@ class BluetoothEventsListener(PythonJavaClass):
     __javainterfaces__ = ['org.kivy.ble.PythonBluetooth']
     __javacontext__ = 'app'
 
-    def __init__(self):
+    def __init__(self, dispatcher):
         super(BluetoothEventsListener, self).__init__()
+        self.dispatcher = dispatcher
 
     @java_method('(Landroid/bluetooth/BluetoothDevice;I[B)V')
     def on_device(self, device, rssi, record):
         Logger.debug("on_device name: {}, signal: {}".format(device.getName(), rssi))
+        self.dispatcher.dispatch('on_device', device, rssi, Advertisement(record))
 
     @java_method('()V')
     def on_scan_completed(self):
         Logger.debug("on_scan_completed")
+        self.dispatcher.dispatch('on_scan_completed')
 
 class BluetoothLowEnergy(EventDispatcher):
+
+    __events__ = ('on_device', 'on_scan_completed')
 
     enable_bluetooth_code = 1024
 
     def __init__(self):
-        self._listener = BluetoothEventsListener()
+        super(BluetoothLowEnergy, self).__init__()
+        self._listener = BluetoothEventsListener(self)
         self._ble = BLE(self._listener)
 
     def start_scan(self, period):
         return self._ble.startScan(period, self.enable_bluetooth_code)
+
+    def stop_scan(self):
+        self._ble.stopScan()
+
+    def on_device(self, device, rssi, advertisement):
+        Logger.debug("on_device unhandled event")
+
+    def on_scan_completed(self):
+        Logger.debug("on_scan_completed unhandled event")
 
 class Advertisement(object):
     """Advertisement data record parser
