@@ -1,10 +1,11 @@
 from kivy.logger import Logger
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, ObjectProperty
 from ble import BluetoothLowEnergy, Advertisement
 
 class Drone(BluetoothLowEnergy):
 
     state = StringProperty()
+    device = ObjectProperty(None)
 
     identity = bytearray([
         0x43, 0x00, # Parrot Bluetooth ID
@@ -35,5 +36,10 @@ class Drone(BluetoothLowEnergy):
                 name = str(ad.data)
         if drone_found:
             self.state = 'found'
+            self.device = device
             Logger.debug("Drone detected: {}".format(name))
             self.stop_scan()
+
+    def on_scan_completed(self):
+        if self.device:
+            self.connect_gatt(self.device)

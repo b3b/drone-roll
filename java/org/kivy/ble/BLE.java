@@ -7,6 +7,9 @@ import android.content.Context;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothProfile;
 import android.os.Handler;
 
 import org.kivy.ble.PythonBluetooth;
@@ -16,12 +19,14 @@ public class BLE {
         private PythonBluetooth mPython;
         private Context mContext;
         private BluetoothAdapter mBluetoothAdapter;
+        public BluetoothGatt mBluetoothGatt;
         private Handler mHandler;
         private boolean mScanning;
 
         public BLE(PythonBluetooth python) {
                 mPython = python;
                 mContext = (Context) PythonActivity.mActivity;
+                mBluetoothGatt = null;
 
                 final BluetoothManager bluetoothManager =
                         (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -74,4 +79,42 @@ public class BLE {
                                         });
                         }
                 };
- }
+
+        public void connectGatt(BluetoothDevice device) {
+                Log.d(TAG, "connectGatt");
+                if (mBluetoothGatt == null) {
+                        mBluetoothGatt = device.connectGatt(mContext, false, mGattCallback);
+                }
+        }
+
+        public void closeGatt() {
+                Log.d(TAG, "closeGatt");
+                if (mBluetoothGatt != null) {
+                        mBluetoothGatt.close();
+                        mBluetoothGatt = null;
+                }
+        }
+
+        private final BluetoothGattCallback mGattCallback =
+                new BluetoothGattCallback() {
+                        @Override
+                        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+                                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                                        Log.d(TAG, "Connected to GATT server");
+                                        mBluetoothGatt.discoverServices();
+                                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                                        Log.d(TAG, "Disconnected from GATT server");
+                                }
+                        }
+
+                        @Override
+                        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                                if (status == BluetoothGatt.GATT_SUCCESS) {
+                                        Log.d(TAG, "onServicesDiscovered - success");
+                                        mPython.on_services(mBluetoothGatt.getServices());
+                                } else {
+                                        Log.d(TAG, "onServicesDiscovered status:" + status);
+                                }
+                        }
+                };
+}

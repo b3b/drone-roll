@@ -25,9 +25,19 @@ class BluetoothEventsListener(PythonJavaClass):
         Logger.debug("on_scan_completed")
         self.dispatcher.dispatch('on_scan_completed')
 
+    @java_method('(Ljava/util/List;)V')
+    def on_services(self, services):
+        for service in services.toArray():
+            service_uuid = service.getUuid().toString()
+            Logger.debug("Service discovered: {}".format(service_uuid))
+            for c in service.getCharacteristics().toArray():
+                characteristic_uuid = c.getUuid().toString()
+                Logger.debug("Characteristic discovered: {}".format(characteristic_uuid))
+        self.dispatcher.dispatch('on_services', services)
+
 class BluetoothLowEnergy(EventDispatcher):
 
-    __events__ = ('on_device', 'on_scan_completed')
+    __events__ = ('on_device', 'on_scan_completed', 'on_services')
 
     enable_bluetooth_code = 1024
 
@@ -42,11 +52,20 @@ class BluetoothLowEnergy(EventDispatcher):
     def stop_scan(self):
         self._ble.stopScan()
 
+    def connect_gatt(self, device):
+        self._ble.connectGatt(device)
+
+    def close_gatt(self):
+        self._ble.closeGatt()
+
     def on_device(self, device, rssi, advertisement):
         Logger.debug("on_device unhandled event")
 
     def on_scan_completed(self):
         Logger.debug("on_scan_completed unhandled event")
+
+    def on_services(self, services):
+        Logger.debug("on_services unhandled event")
 
 class Advertisement(object):
     """Advertisement data record parser

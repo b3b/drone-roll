@@ -38,7 +38,7 @@ class DroneApp(App):
 
     @run_on_ui_thread
     def start_scan(self):
-        self.drone.start_scan(20000)
+        self.drone.start_scan(2000)
 
     def on_resume(self):
         if not self.drone.state:
