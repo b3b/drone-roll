@@ -1,6 +1,16 @@
 from kivy.logger import Logger
+from kivy.utils import platform
 from kivy.properties import StringProperty, ObjectProperty
+from jnius import autoclass
 from ble import BluetoothLowEnergy, Advertisement
+import arsdk
+
+if platform == 'android':
+    BluetoothGattDescriptor = autoclass('android.bluetooth.BluetoothGattDescriptor')
+    UUID = autoclass('java.util.UUID')
+
+class EnableNotificatiosException(Exception):
+    pass
 
 class Drone(BluetoothLowEnergy):
 
@@ -43,3 +53,41 @@ class Drone(BluetoothLowEnergy):
     def on_scan_completed(self):
         if self.device:
             self.connect_gatt(self.device)
+
+    def on_services(self, services):
+        self.services = services
+        for name in ['battery']:
+            short_uuid = arsdk.characteristic_ids[name]
+            try:
+                self.enable_notifications(short_uuid)
+            except EnableNotificatiosException, e:
+                Logger.exception("Error enabling notifications: {}".format(': '.join(e.args)))
+            else:
+                Logger.debug("Notifications enabled: {}".format(short_uuid))
+
+
+    def enable_notifications(self, short_uuid):
+        characteristic = self.services.search(short_uuid)
+        if not characteristic:
+            raise EnableNotificatiosException(short_uuid, "can't find characteristic")
+
+        gatt = self._ble.getGatt()
+        if not gatt:
+            raise EnableNotificatiosException(short_uuid, "can't get GATT")
+
+        if not gatt.setCharacteristicNotification(characteristic, True):
+            raise EnableNotificatiosException(short_uuid, "can't enable notifications")
+
+        #descriptors = characteristic.getDescriptors().toArray()
+        #if descriptors and (len(descriptors) == 1):
+        #    descriptor = descriptors[0]
+
+        descriptor = characteristic.getDescriptor(UUID.fromString(arsdk.UPDATE_NOTIFICATION_DESCRIPTOR_UUID))
+        if not descriptor:
+            raise EnableNotificatiosException(short_uuid, "can't find descriptor")
+
+        if not descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE):
+            raise EnableNotificatiosException(short_uuid, "can't set ENABLE_NOTIFICATION_VALUE")
+
+        if not gatt.writeDescriptor(descriptor):
+            raise EnableNotificatiosException(short_uuid, "can't write descriptor")

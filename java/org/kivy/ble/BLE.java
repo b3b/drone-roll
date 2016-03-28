@@ -7,9 +7,9 @@ import android.content.Context;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothProfile;
 import android.os.Handler;
 
 import org.kivy.ble.PythonBluetooth;
@@ -19,7 +19,7 @@ public class BLE {
         private PythonBluetooth mPython;
         private Context mContext;
         private BluetoothAdapter mBluetoothAdapter;
-        public BluetoothGatt mBluetoothGatt;
+        private BluetoothGatt mBluetoothGatt;
         private Handler mHandler;
         private boolean mScanning;
 
@@ -31,6 +31,10 @@ public class BLE {
                 final BluetoothManager bluetoothManager =
                         (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
                 mBluetoothAdapter = bluetoothManager.getAdapter();
+        }
+
+        public BluetoothGatt getGatt() {
+                return mBluetoothGatt;
         }
 
         public Boolean startScan(long scanPeriod, int requestEnableBtCode) {
