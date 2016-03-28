@@ -65,7 +65,6 @@ class Drone(BluetoothLowEnergy):
             else:
                 Logger.debug("Notifications enabled: {}".format(short_uuid))
 
-
     def enable_notifications(self, short_uuid):
         characteristic = self.services.search(short_uuid)
         if not characteristic:
@@ -91,3 +90,10 @@ class Drone(BluetoothLowEnergy):
 
         if not gatt.writeDescriptor(descriptor):
             raise EnableNotificatiosException(short_uuid, "can't write descriptor")
+
+    def on_characteristic_changed(self, characteristic):
+        uuid = characteristic.getUuid().toString()
+        data = characteristic.getValue()
+        Logger.debug("Characteristic {} changed value: {}".format(uuid, str(data).encode('hex')))
+        packet = arsdk.Packet.unpack(data)
+        Logger.debug("Characteristic {} changed decoded: {}".format(packet))

@@ -39,9 +39,15 @@ class BluetoothEventsListener(PythonJavaClass):
                 services_dict[service_uuid][characteristic_uuid] = c
         self.dispatcher.dispatch('on_services', services_dict)
 
+    @java_method('(Landroid/bluetooth/BluetoothGattCharacteristic;)V')
+    def on_characteristic_changed(self, characteristic):
+        uuid = characteristic.getUuid().toString()
+        Logger.debug("Characteristic changed: {}".format(uuid))
+        self.dispatcher.dispatch('on_characteristic_changed', characteristic)
+
 class BluetoothLowEnergy(EventDispatcher):
 
-    __events__ = ('on_device', 'on_scan_completed', 'on_services')
+    __events__ = ('on_device', 'on_scan_completed', 'on_services', 'on_characteristic_changed')
 
     enable_bluetooth_code = 1024
 
@@ -70,6 +76,9 @@ class BluetoothLowEnergy(EventDispatcher):
 
     def on_services(self, services):
         Logger.debug("on_services unhandled event")
+
+    def on_characteristic_changed(self, characteristic):
+        Logger.debug("on_characteristic_changed unhandled event")
 
 class Advertisement(object):
     """Advertisement data record parser

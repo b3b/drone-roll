@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Handler;
 
 import org.kivy.ble.PythonBluetooth;
@@ -119,6 +120,13 @@ public class BLE {
                                 } else {
                                         Log.d(TAG, "onServicesDiscovered status:" + status);
                                 }
+                        }
+
+                        @Override
+                        public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                            BluetoothGattCharacteristic characteristic) {
+                                Log.d(TAG, "onCharacteristicChanged");
+                                mPython.on_characteristic_changed(characteristic);
                         }
                 };
 }
