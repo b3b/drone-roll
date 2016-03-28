@@ -3,11 +3,15 @@ from kivy.utils import platform
 from kivy.properties import StringProperty, ObjectProperty
 from jnius import autoclass
 from ble import BluetoothLowEnergy, Advertisement
+from collections import defaultdict, namedtuple
+from itertools import count
 import arsdk
 
 if platform == 'android':
     BluetoothGattDescriptor = autoclass('android.bluetooth.BluetoothGattDescriptor')
     UUID = autoclass('java.util.UUID')
+
+CommandData = namedtuple('CommandData', ['number', 'characteristic', 'data'])
 
 class EnableNotificatiosException(Exception):
     pass
@@ -22,6 +26,9 @@ class Drone(BluetoothLowEnergy):
         0xcf, 0x19, # Parrot USB ID
         0x00, 0x09  # Rolling Spider USB Product ID
     ])
+
+    sequences = defaultdict(lambda: count(1))
+    command_number = count(1)
 
     def start_scan(self, period):
         started = super(Drone, self).start_scan(period)
@@ -97,3 +104,29 @@ class Drone(BluetoothLowEnergy):
         Logger.debug("Characteristic {} changed value: {}".format(uuid, str(data).encode('hex')))
         packet = arsdk.Packet.unpack(data)
         Logger.debug("Characteristic {} changed decoded: {}".format(packet))
+
+    def construct_command(self, class_name, command_name,
+                          data_type='data', buffer_name='ack',
+                          project_name='mini_drone', arguments=None):
+        data_type = arsdk.data_types[data_type]
+        buffer_id = arsdk.characteristic_ids[buffer_name]
+        sequence_number = 255 & self.sequences[buffer_id].next()
+
+        command_class = arsdk.projects[project_name]['classes'][class_name]
+        project_id = arsdk.projects[project_name]['project_id']
+        class_id = command_class['class_id']
+        command_id = command_class['commands'].index(command_name)
+        packet = arsdk.Packet(data_type, sequence_number,
+                              project_id, class_id, command_id, arguments)
+        characteristic = self.services.search(buffer_id)
+        command_number = self.command_number.next()
+        Logger.debug("Command<{n}> constructed: {packet}".format(
+            n=command_number, packet=packet))
+        return CommandData(command_number, characteristic, packet.pack())
+
+    def write_command(self, *args, **kwargs):
+        command = self.construct_command(*args, **kwargs)
+        result = self._ble.writeCharacteristic(command.characteristic, command.data)
+        Logger.debug("Write command<{n}> result: {result}".format(
+            n=command.number, result=result))
+        return result

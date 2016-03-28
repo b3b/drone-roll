@@ -129,4 +129,19 @@ public class BLE {
                                 mPython.on_characteristic_changed(characteristic);
                         }
                 };
+
+        public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
+                if (characteristic.setValue(data)) {
+                        return mBluetoothGatt.writeCharacteristic(characteristic);
+                }
+                return false;
+        }
+
+        public boolean writeCharacteristicNoResponse(BluetoothGattCharacteristic characteristic, byte[] data) {
+                if (characteristic.setValue(data)) {
+                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                        return mBluetoothGatt.writeCharacteristic(characteristic);
+                }
+                return false;
+        }
 }
