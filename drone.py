@@ -1,6 +1,7 @@
 from kivy.logger import Logger
 from kivy.utils import platform
 from kivy.properties import StringProperty, ObjectProperty
+from kivy.clock import Clock
 from jnius import autoclass
 from ble import BluetoothLowEnergy, Advertisement
 from collections import defaultdict, namedtuple
@@ -72,6 +73,11 @@ class Drone(BluetoothLowEnergy):
             else:
                 Logger.debug("Notifications enabled: {}".format(short_uuid))
 
+        self.wheels_on()
+        Clock.schedule_once(self.emergency, 5)
+        Clock.schedule_once(self.flat_trim, 1)
+        Clock.schedule_once(self.take_off, 2)
+
     def enable_notifications(self, short_uuid):
         characteristic = self.services.search(short_uuid)
         if not characteristic:
@@ -130,3 +136,15 @@ class Drone(BluetoothLowEnergy):
         Logger.debug("Write command<{n}> result: {result}".format(
             n=command.number, result=result))
         return result
+
+    def wheels_on(self, *args):
+        self.write_command('SpeedSettings', 'Wheels', arguments=[1])
+
+    def flat_trim(self, *args):
+        self.write_command('Piloting', 'FlatTrim')
+
+    def take_off(self, *args):
+        self.write_command('Piloting', 'TakeOff')
+
+    def emergency(self, *args):
+        self.write_command('Piloting', 'Emergency', buffer_name='emergency')
