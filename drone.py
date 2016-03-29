@@ -76,7 +76,7 @@ class Drone(BluetoothLowEnergy):
         self.wheels_on()
         Clock.schedule_once(self.emergency, 5)
         Clock.schedule_once(self.flat_trim, 1)
-        Clock.schedule_once(self.take_off, 2)
+        #Clock.schedule_once(self.take_off, 2)
 
     def enable_notifications(self, short_uuid):
         characteristic = self.services.search(short_uuid)
