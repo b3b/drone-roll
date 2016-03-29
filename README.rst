@@ -1,4 +1,9 @@
 Rolling spider scripter
 =======================
 
-**Status**: no working version, experimenting on access to Android Bluetooth low energy from Python.
+Status
+------
+
+Is dangerous:
+
+![Take Off](https://raw.githubusercontent.com/b3b/drone-roll/master/docs/takeoff.gif)
