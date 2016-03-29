@@ -6,4 +6,7 @@ Status
 
 Is dangerous:
 
-![Take Off](https://raw.githubusercontent.com/b3b/drone-roll/master/docs/takeoff.gif)
+.. image:: https://raw.githubusercontent.com/b3b/drone-roll/master/docs/takeoff.gif
+    :alt: Take off
+    :align: center
+
