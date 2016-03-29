@@ -109,7 +109,7 @@ class Drone(BluetoothLowEnergy):
         data = characteristic.getValue()
         Logger.debug("Characteristic {} changed value: {}".format(uuid, str(data).encode('hex')))
         packet = arsdk.Packet.unpack(data)
-        Logger.debug("Characteristic {} changed decoded: {}".format(packet))
+        Logger.debug("Characteristic {} changed decoded: {}".format(uuid, packet))
 
     def construct_command(self, class_name, command_name,
                           data_type='data', buffer_name='ack',
