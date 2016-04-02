@@ -20,7 +20,7 @@ class EnableNotificatiosException(Exception):
 class Drone(BluetoothLowEnergy):
 
     state = StringProperty()
-    device = ObjectProperty(None)
+    ble_device = ObjectProperty(None)
 
     identity = bytearray([
         0x43, 0x00, # Parrot Bluetooth ID
@@ -54,13 +54,13 @@ class Drone(BluetoothLowEnergy):
                 name = str(ad.data)
         if drone_found:
             self.state = 'found'
-            self.device = device
+            self.ble_device = device
             Logger.debug("Drone detected: {}".format(name))
             self.stop_scan()
 
     def on_scan_completed(self):
-        if self.device:
-            self.connect_gatt(self.device)
+        if self.ble_device:
+            self.connect_gatt(self.ble_device)
 
     def on_services(self, services):
         self.services = services
