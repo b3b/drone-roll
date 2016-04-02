@@ -19,5 +19,7 @@ Related resources
 
 * `ARDRoneSDK3 API Reference <http://developer.parrot.com/docs/bebop/>`_ - SDK for drone is available, but not used in this project
 * `ARSDK Protocols <http://developer.parrot.com//docs/bebop/ARSDK_Protocols.pdf>`_
+* `py-minidrone <https://github.com/sethyx/py-minidrone>`_
+* `Jessica <http://robotika.cz/robots/jessica/en>`_
 * `Rolling Spider for Node.js <https://github.com/voodootikigod/node-rolling-spider>`_
 * `node-bebop <https://github.com/hybridgroup/node-bebop>`_
