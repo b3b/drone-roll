@@ -77,8 +77,8 @@ class Packet(object):
     >>> Packet.unpack([2, 3, 2, 1, 2, 0, 1])
     <Packet DT:2(data) SQ:3 PJ:2(mini_drone) CL:1(SpeedSettings) CC:2(Wheels) args:[1]>
     >>> Packet(data_type=2, sequence_number=3, project_id=0,
-    ... class_id=5, command_id=1, arguments=[95]).pack()
-    [2, 3, 0, 5, 1, 0, 95]
+    ... class_id=5, command_id=1, arguments=[95, -2]).pack()
+    [2, 3, 0, 5, 1, 0, 95, 254]
     """
 
     fmt = '<Packet DT:{DT}({dt}) SQ:{SQ} PJ:{PJ}({pj}) CL:{CL}({cl}) CC:{CC}({cc}) args:{args}>'
@@ -89,7 +89,7 @@ class Packet(object):
         self.project_id = project_id
         self.class_id = class_id
         self.command_id = command_id
-        self.arguments = arguments or []
+        self.arguments = [b & 0xFF for b in arguments] if arguments else []
 
     def __repr__(self):
         cl = command_classes_names.get((self.project_id, self.class_id), '??')
