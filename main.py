@@ -25,7 +25,8 @@ class DroneApp(App):
         return True
 
     def on_resume(self):
-        self.start_scan()
+        if not self.drone.state:
+            self.start_scan()
 
     @run_on_ui_thread
     def init(self, *args, **kwargs):
@@ -38,11 +39,8 @@ class DroneApp(App):
 
     @run_on_ui_thread
     def start_scan(self):
-        self.drone.start_scan(2000)
+        self.drone.start_scan()
 
-    def on_resume(self):
-        if not self.drone.state:
-            self.start_scan()
 
 if __name__ == '__main__':
     DroneApp().run()

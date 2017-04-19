@@ -1,18 +1,18 @@
 [app]
 title = Drone Roll
-version = 0.0.1
+version = 1.0
 package.name = droneroll
 package.domain = org.kivy
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
+p4a.local_recipes = recipes
 
-android.add_src = java
-android.permissions = BLUETOOTH, BLUETOOTH_ADMIN
+android.permissions = BLUETOOTH, BLUETOOTH_ADMIN, ACCESS_COARSE_LOCATION
 
-android.private_storage = False
+# android.private_storage = False
 
-requirements = kivy
+requirements = hostpython2,kivy,android,able
 
 orientation = landscape
 fullscreen = 1
