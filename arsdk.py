@@ -6,15 +6,24 @@ data_types = {
     'low_latency_data': 3,
     'data_with_ack': 4
 }
-data_type_names = {v:k for k, v in data_types.items()}
+data_type_names = {v: k for k, v in data_types.items()}
 
-characteristic_ids = {
-    'non_ack': 'fa0a',
-    'ack': 'fa0b',
-    'emergency': 'fa0c',
-    'battery': 'fb0f'
-}
 
+class Characteristic(object):
+
+    send_ids = {
+        'no_ack_required': 'fa0a',
+        'ack_required': 'fa0b',
+        'high_priority': 'fa0c',
+        'ack': 'fa1e'
+    }
+
+    receive_ids = {
+        'ack_required': 'fb0e',
+        'no_ack_required': 'fb0f',
+        'ack': 'fb1b',
+        'ack_high_priority': 'fb1c',
+    }
 
 # list is not complete
 projects = {

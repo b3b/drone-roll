@@ -63,8 +63,7 @@ class Drone(BluetoothDispatcher):
 
     def on_services(self, status, services):
         self.services = services
-        for name in ['battery']:
-            short_uuid = arsdk.characteristic_ids[name]
+        for short_uuid in arsdk.Characteristic.receive_ids.values():
             characteristic = self.services.search(short_uuid)
             self.enable_notifications(characteristic)
 
