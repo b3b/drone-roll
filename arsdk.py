@@ -30,17 +30,36 @@ projects = {
     'common': {
         'project_id': 0,
         'classes': {
+            'Settings': {
+                'class_id': 2,
+                'commands': ('AllSettings', 'Reset'),
+            },
+            'SettingsState': {
+                'class_id': 3,
+                'commands': (
+                    'AllSettingsChanged', 'ResetChanged', 'ProductNameChanged',
+                    'ProductVersionChanged', 'ProductSerialHighChanged',
+                    'ProductSerialLowChanged', 'CountryChanged',
+                    'AutoCountryChanged'
+                ),
+            },
+            'Common': {
+                'class_id': 4,
+                'commands': ('AllStates', 'CurrentDate', 'CurrentTime',
+                             'Reboot')
+            },
             'CommonState': {
                 'class_id': 5,
                 'commands': (
-                    "AllStatesChanged", "BatteryStateChanged",
-                    "MassStorageStateListChanged", "MassStorageInfoStateListChanged",
-                    "CurrentDateChanged", "CurrentTimeChanged",
-                    "MassStorageInfoRemainingListChanged", "WifiSignalChanged",
-                    "SensorsStatesListChanged", "ProductModel",
-                    "CountryListKnown"
+                    'AllStatesChanged', 'BatteryStateChanged',
+                    'MassStorageStateListChanged',
+                    'MassStorageInfoStateListChanged',
+                    'CurrentDateChanged', 'CurrentTimeChanged',
+                    'MassStorageInfoRemainingListChanged', 'WifiSignalChanged',
+                    'SensorsStatesListChanged', 'ProductModel',
+                    'CountryListKnown'
                 )
-            }
+            },
         },
     },
     'mini_drone': {
@@ -53,11 +72,41 @@ projects = {
                     'PCMD', 'Landing',
                     'Emergency', 'AutoTakeOffMode')
             },
-            "SpeedSettings": {
+            'SpeedSettings': {
                 'class_id': 1,
                 'commands': (
                     'MaxVerticalSpeed', 'MaxRotationSpeed',
                     'Wheels', 'MaxHorizontalSpeed',
+                )
+            },
+            'SpeedSettingsState': {
+                'class_id': 5,
+                'commands': (
+                    'MaxVerticalSpeed', 'MaxRotationSpeed',
+                    'Wheels', 'MaxHorizontalSpeed',
+                )
+            },
+            'PilotingSettings': {
+                'class_id': '8',
+                'commands': ('MaxAltitude', 'MaxTilt', 'BankedTurn')
+            },
+            'PilotingSettingsState': {
+                'class_id': 9,
+                'commands': ('MaxAltitudeChanged',
+                             'MaxTiltChanged',
+                             'BankedTurnChanged'
+                )
+            },
+            'Settings': {
+                'class_id': 10,
+                'commands': ('CutOutMode',)
+            },
+            'SettingsState': {
+                'class_id': 11,
+                'commands': (
+                    'ProductMotorsVersionChanged',
+                    'ProductInertialVersionChanged',
+                    'CutOutModeChanged',
                 )
             },
         }
