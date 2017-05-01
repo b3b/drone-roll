@@ -1,19 +1,14 @@
-from collections import defaultdict, namedtuple
-from itertools import count
-
 import arsdk
 from able import GATT_SUCCESS, Advertisement, BluetoothDispatcher
 from kivy.clock import Clock
 from kivy.logger import Logger
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty
+
+from .drone import DroneBehavior
 
 
-CommandData = namedtuple('CommandData', ['number', 'characteristic', 'data'])
+class Drone(DroneBehavior, BluetoothDispatcher):
 
-
-class Drone(BluetoothDispatcher):
-
-    state = StringProperty()
     ble_device = ObjectProperty(None)
 
     identity = bytearray([
@@ -22,11 +17,8 @@ class Drone(BluetoothDispatcher):
         0x00, 0x09   # Rolling Spider USB Product ID
     ])
 
-    sequences = defaultdict(lambda: count(1))
-    command_number = count(1)
-
-    def start_scan(self):
-        super(Drone, self).start_scan()
+    def discover(self):
+        self.start_scan()
         self.state = 'scan'
 
     def on_device(self, device, rssi, advertisement):
@@ -68,7 +60,7 @@ class Drone(BluetoothDispatcher):
             self.enable_notifications(characteristic)
 
         self.wheels_on()
-        Clock.schedule_once(self.emergency, 5)
+        Clock.schedule_once(self.emergency, 7)
         Clock.schedule_once(self.flat_trim, 1)
         # Clock.schedule_once(self.take_off, 2)
 
@@ -80,39 +72,3 @@ class Drone(BluetoothDispatcher):
         packet = arsdk.Packet.unpack(data)
         Logger.debug("Characteristic {} changed decoded: {}".format(
             uuid, packet))
-
-    def construct_command(self, class_name, command_name,
-                          data_type='data', buffer_name='ack',
-                          project_name='mini_drone', arguments=None):
-        data_type = arsdk.data_types[data_type]
-        buffer_id = arsdk.characteristic_ids[buffer_name]
-        sequence_number = 255 & self.sequences[buffer_id].next()
-
-        command_class = arsdk.projects[project_name]['classes'][class_name]
-        project_id = arsdk.projects[project_name]['project_id']
-        class_id = command_class['class_id']
-        command_id = command_class['commands'].index(command_name)
-        packet = arsdk.Packet(data_type, sequence_number,
-                              project_id, class_id, command_id, arguments)
-        characteristic = self.services.search(buffer_id)
-        command_number = self.command_number.next()
-        Logger.debug("Command<{n}> constructed: {packet}".format(
-            n=command_number, packet=packet))
-        return CommandData(command_number, characteristic, packet.pack())
-
-    def write_command(self, *args, **kwargs):
-        command = self.construct_command(*args, **kwargs)
-        self.write_characteristic(command.characteristic, command.data)
-        Logger.debug("Write command<{n}>".format(n=command.number))
-
-    def wheels_on(self, *args):
-        self.write_command('SpeedSettings', 'Wheels', arguments=[1])
-
-    def flat_trim(self, *args):
-        self.write_command('Piloting', 'FlatTrim')
-
-    def take_off(self, *args):
-        self.write_command('Piloting', 'TakeOff')
-
-    def emergency(self, *args):
-        self.write_command('Piloting', 'Emergency', buffer_name='emergency')
