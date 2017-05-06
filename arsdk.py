@@ -173,3 +173,36 @@ class Packet(object):
         unpacked = struct.unpack_from('<BBBBH', buffer(bytearray(data)))
         arguments = data[6:]
         return Packet(*unpacked+(arguments,))
+
+
+class Acknowledge(object):
+    """Data acknowledge packet packer/unpacker
+    Packet format:
+           |data type|sequence_number|data_sequence_number|
+    Sizes:  1 byte    1byte           1 byte
+
+    >>> Acknowledge.unpack([4, 64, 128])
+    <Acknowledge SQ:64 DSQ:128>
+    >>> Acknowledge(sequence_number=15, data_sequence_number=16).pack()
+    [1, 15, 16]
+    """
+
+    fmt = '<Acknowledge SQ:{SQ} DSQ:{DSQ}>'
+
+    def __init__(self, sequence_number, data_sequence_number):
+        self.sequence_number = sequence_number
+        self.data_sequence_number = data_sequence_number
+
+    def __repr__(self):
+        return self.fmt.format(SQ=self.sequence_number,
+                               DSQ=self.data_sequence_number)
+
+    def pack(self):
+        return [data_types['ack'],
+                self.sequence_number,
+                self.data_sequence_number]
+
+    @classmethod
+    def unpack(self, data):
+        unpacked = struct.unpack_from('<BBB', buffer(bytearray(data)))
+        return Acknowledge(unpacked[1], unpacked[2])
