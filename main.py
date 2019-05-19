@@ -36,7 +36,7 @@ class DroneApp(App):
 
     def on_resume(self):
         if not self.drone.state:
-            self.disvover_drone()
+            self.discover_drone()
 
     @run_on_ui_thread
     def init(self, *args, **kwargs):
